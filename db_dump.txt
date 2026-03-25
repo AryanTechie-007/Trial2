@@ -1,0 +1,4 @@
+ID | Name | Email | Password Hash | Plan | Company
+--------------------------------------------------------------------------------
+(1, 'User', 'user1@example1.com', '$2b$12$Nqf/ghmM/mNB5MdTcKxaIecomAcgUFlLvx5fLfwv6DcoZgMVIUB/2', 'starter', None)
+(2, 'hoahao', 'user2@example.com', '$2b$12$BPU6Gh32/FMggve3XTKQquaj71bcqlUaRkM6f1AmxFRVMLzSrD9hi', 'starter', None)

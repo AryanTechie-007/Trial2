@@ -1,0 +1,46 @@
+What Have We Built Together? (RivalLens Overview)
+
+Objective:
+We built "RivalLens," an AI-powered surveillance platform that automatically tracks your competitors' websites and turns their marketing jargon into actionable, hard data for your sales and executive teams.
+
+Here is a simple, non-technical breakdown of exactly what we've accomplished together:
+
+1. The "Web Reader" (The Info Gatherer)
+Instead of forcing a human to spend hours reading through competitor website pages, we built a digital robot. This robot visits any competitor link you feed it, waits for the page to fully load, and aggressively deletes all the useless noise (like menus, footers, pop-ups, and hidden code). It extracts only the pure, raw text and the "Call to Action" buttons (like "Buy Now" or "Start Free Trial").
+
+2. The "AI Brain" (The Intelligence Analyst)
+Once our robot gathers the raw text from a competitor's website, we hand it over to a highly advanced artificial intelligence (Google's Gemini 2.5 Flash). We trained this AI to act like a ruthless business analyst. It reads the competitor's claims and automatically generates three extremely valuable things:
+   - Intent Signals: It detects if the competitor is changing strategy (e.g., "They are starting to target Enterprise companies" or "They lowered their pricing").
+   - Quantitative Facts: It specifically hunts for hard numbers—pricing, revenue, number of customers, or performance metrics. It ignores marketing fluff and only gives you the facts.
+   - Strategic Battlecard: It finds their biggest marketing claim, generates a strategic counter-argument for your company, and writes a word-for-word "Sales Rebuttal" your sales reps can use when trying to win a deal against them.
+
+3. The "Auto-Discovery Engine" (The Detective)
+We built a feature where you simply type a company name, and the AI immediately searches its vast, real-world knowledge to instantly identify who their direct competitors are. With one click, it adds those competitors to your tracking list and sends out the web reader to investigate them automatically.
+
+4. The Visual Dashboard (The Mission Control Center)
+We didn't just want data hidden in a boring spreadsheet. We built a beautiful, high-tech, "Dark Mode" website dashboard for you and your team to interact with. 
+   - You can log in securely.
+   - You have a navigation sidebar showing all the competitors you are currently spying on.
+   - Clicking a competitor opens their live profile, organizing all the AI's intelligence into beautiful, easy-to-read cards.
+
+5. The "Visual Comparison Mode" (The Scoreboard)
+We built a feature that lets you select multiple competitors at the same time and hit an AI "Compare" button. The AI reads all their profiles and scores them out of 100 on four critical business categories:
+   - Cost Leadership (Who is cheaper/more efficient?)
+   - Feature Depth (How incredibly powerful is their product?)
+   - Enterprise Readiness (Are they secure and reliable for huge corporate clients?)
+   - Developer Experience (Is their tool actually easy to use?)
+It then automatically draws beautiful visual graphs (a Spider-Web Radar map and a Bar chart) so your team can visually "see" the exact strengths and weaknesses of your enemies.
+
+6. The "Database Vault" (The Memory Bank)
+Behind the scenes, every single piece of data (the numbers, the battlecards, the timestamps of when the scan happened) is permanently saved into a local digital vault. It tracks history, ensuring your dashboard loads instantly and never forgets past intelligence.
+
+7. The "Identity Firewall" (The Security Guard)
+We significantly upgraded the entire platform to be "Multi-Tenant". This means the system now enforces a hardened user login database. When you or your team members register an account, your data is permanently locked securely inside your own sub-database vault alongside your login credentials. A brand new user will see an entirely empty tracker, while your dashboard only ever shows the competitors you explicitly mapped to yourself. You are completely separated from other accounts! We also added Brute-Force Rate-Limiting which strictly locks out malicious bots that try to repeatedly guess your password.
+
+8. The "Baseline Architecture" (The Mirror)
+Standard market intelligence is useless if you don't know where *you* stand. We built a brand new "Workspace/Account Settings" panel where you can securely register your *own* company's identity. By doing this, the AI stops analyzing competitors in a vacuum, and starts continuously comparing them *directly against you*.
+
+9. The "Enterprise Strike Plans" (The War Room)
+For users on the premium Enterprise tier, we engineered a completely new AI capability. Using your unique "Baseline Architecture" and combining it instantly with the live scraped data of a specific rival, the Gemini Brain will synthesize an aggressive, "How-to-Beat-Them" battle Blueprint. It generates highly specific "Offensive Vectors" (expert steps on how to steal their market share immediately) and "Defensive Protocols" (steps on how to prevent them from stealing your clients).
+
+In short: You now own a highly-secure, Multi-Tenant Intelligence Engine that not only tracks market facts but actively synthesizes battle strategies against your rivals using your own company's baseline!
