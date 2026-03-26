@@ -2,13 +2,13 @@ import json
 from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from database import engine, Base, get_db, Scrape, User
+from .database import engine, Base, get_db, Scrape, User
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from auth import get_password_hash, verify_password, create_access_token, SECRET_KEY, ALGORITHM
+from .auth import get_password_hash, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 
@@ -55,6 +55,7 @@ class UserCreate(BaseModel):
     name: str
     email: str
     password: str
+    company_name: str
 
 class UserLogin(BaseModel):
     email: str
@@ -71,6 +72,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         email=user.email,
         hashed_password=hashed_pw,
         name=user.name,
+        company_name=user.company_name,
         plan_tier="starter" # default plan
     )
     db.add(new_user)
@@ -95,19 +97,32 @@ def login(request: Request, user: UserLogin, db: Session = Depends(get_db)):
 class ScrapeRequest(BaseModel):
     url: str
     name: str
+    target_scope: str | None = "all"
 
 @app.post("/api/competitors/scrape")
 def trigger_scrape(request: ScrapeRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    from scraper import scrape_competitor
-    from ai_engine import process_competitor_content
+    # Tier-based scrape limits
+    tier_limits = {
+        "free": 2,
+        "starter": 4,
+        "growth": 10,
+        "enterprise": 20
+    }
+    user_scrapes = db.query(Scrape).filter(Scrape.user_id == current_user.id).count()
+    limit = tier_limits.get(current_user.plan_tier, 2)
+    if user_scrapes >= limit:
+        raise HTTPException(status_code=403, detail=f"Scrape limit reached for your plan ({current_user.plan_tier}). Upgrade to add more competitors.")
+
+    from .scraper import scrape_competitor
+    from .ai_engine import process_competitor_content
     try:
-        content, hash_val = scrape_competitor(request.url)
-        analysis_dict = process_competitor_content(content)
+        content = scrape_competitor(request.url)
+        analysis_dict = process_competitor_content(content, request.target_scope or "all")
         
         new_scrape = Scrape(
             user_id=current_user.id,
             competitor_name=request.name.lower(),
-            content_hash=hash_val,
+            content_hash=content.get("content_hash"),
             payload=analysis_dict
         )
         db.add(new_scrape)
@@ -138,7 +153,7 @@ class CompareRequest(BaseModel):
 
 @app.post("/api/competitors/compare")
 def compare(request: CompareRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    from ai_engine import compare_competitors
+    from .ai_engine import compare_competitors
     try:
         data_list = []
         for name in request.competitors:
@@ -156,7 +171,10 @@ def compare(request: CompareRequest, db: Session = Depends(get_db), current_user
 
 @app.post("/api/competitors/discover")
 def discover(request: DiscoverRequest, current_user: User = Depends(get_current_user)):
-    from ai_engine import discover_competitors
+    if current_user.plan_tier not in ["growth", "enterprise"]:
+        raise HTTPException(status_code=403, detail="OSINT Auto-Discovery is locked for your plan. Please upgrade to Growth or Enterprise to unlock instant discovery mapping.")
+
+    from .ai_engine import discover_competitors
     try:
         result = discover_competitors(request.company_name)
         return {"data": result}
@@ -166,17 +184,21 @@ def discover(request: DiscoverRequest, current_user: User = Depends(get_current_
 class ProfileUpdate(BaseModel):
     company_name: str
     plan_tier: str
+    password: str | None = None
 
 @app.post("/api/user/profile")
 def update_profile(profile: ProfileUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    from .auth import get_password_hash
     current_user.company_name = profile.company_name
     current_user.plan_tier = profile.plan_tier
+    if profile.password:
+        current_user.hashed_password = get_password_hash(profile.password)
     db.commit()
     return {"status": "success", "user": {"name": current_user.name, "company": current_user.company_name, "plan": current_user.plan_tier}}
 
 @app.get("/api/user/profile")
 def get_profile(current_user: User = Depends(get_current_user)):
-    return {"name": current_user.name, "email": current_user.email, "company": current_user.company_name, "plan": current_user.plan_tier}
+    return {"name": current_user.name, "email": current_user.email, "company": current_user.company_name, "plan": current_user.plan_tier, "password": current_user.hashed_password}
 
 @app.get("/api/competitors/{name}/strategy")
 def get_strategy(name: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -192,7 +214,7 @@ def get_strategy(name: str, db: Session = Depends(get_db), current_user: User = 
         
     own_scrape = db.query(Scrape).filter(Scrape.user_id == current_user.id, Scrape.competitor_name == current_user.company_name.lower()).order_by(Scrape.timestamp.desc()).first()
 
-    from ai_engine import generate_strike_plan
+    from .ai_engine import generate_strike_plan
     try:
         strike_plan = generate_strike_plan(current_user.company_name, own_scrape.payload if own_scrape else None, name, scrape.payload)
         return {"data": strike_plan}

@@ -1,35 +1,958 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataFlow - Enterprise Data Analytics Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0c0a1a 0%, #1a1635 50%, #0c0a1a 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: flow 6s ease-in-out infinite;
+        }
+        @keyframes flow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(5%, 5%) scale(1.05); }
+        }
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, #ddd6fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        h2 {
+            font-size: 1.5rem;
+            color: #ddd6fe;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+        .tagline {
+            font-size: 1.3rem;
+            color: #f5f3ff;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        .stat-card {
+            background: linear-gradient(145deg, #1e1b2e 0%, #2d2a4a 100%);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #4c4f7a;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa, #c4b5fd);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        .stat-label {
+            color: #a5b4fc;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .stat-change.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+        .stat-change.trend {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: linear-gradient(145deg, #1e1b2e 0%, #252244 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid #4c4f7a;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+            border-radius: 3px;
+        }
+
+        /* Growth Chart */
+        .growth-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 280px;
+            padding: 20px 0 50px;
+            border-bottom: 2px solid #4c4f7a;
+            position: relative;
+        }
+        .chart-bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        .chart-bar {
+            width: 80px;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .chart-bar:hover {
+            filter: brightness(1.2);
+            transform: scale(1.02);
+        }
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .chart-bar.y2023 {
+            height: 50px;
+            background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+        }
+        .chart-bar.y2024 {
+            height: 140px;
+            background: linear-gradient(180deg, #a78bfa, #8b5cf6);
+        }
+        .chart-bar.y2025 {
+            height: 220px;
+            background: linear-gradient(180deg, #c4b5fd, #a78bfa);
+        }
+        .chart-label {
+            color: #a5b4fc;
+            font-weight: 600;
+        }
+
+        /* Donut Charts */
+        .donut-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 40px;
+            padding: 40px 0;
+        }
+        .donut-chart {
+            text-align: center;
+        }
+        .donut {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: conic-gradient(#8b5cf6 0% 65%, #4c4f7a 65% 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .donut::before {
+            content: '';
+            width: 120px;
+            height: 120px;
+            background: #1e1b2e;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .donut-value {
+            position: relative;
+            z-index: 1;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .donut-label {
+            color: #a5b4fc;
+            font-weight: 600;
+        }
+
+        /* Metrics Table */
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        .metrics-table th,
+        .metrics-table td {
+            padding: 18px 20px;
+            text-align: left;
+            border-bottom: 1px solid #4c4f7a;
+        }
+        .metrics-table th {
+            color: #a5b4fc;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .metrics-table td {
+            color: #e2e8f0;
+            font-size: 1.1rem;
+        }
+        .metrics-table tr:hover td {
+            background: rgba(139, 92, 246, 0.05);
+        }
+        .trend-line {
+            width: 60px;
+            height: 30px;
+        }
+
+        /* Processing Stats */
+        .processing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .processing-card {
+            background: linear-gradient(145deg, #2d2a4a 0%, #3d3a6a 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid #4c4f7a;
+        }
+        .processing-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        .processing-label {
+            color: #a5b4fc;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .processing-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .processing-sub {
+            color: #4ade80;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Industry Breakdown */
+        .industry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .industry-card {
+            background: linear-gradient(145deg, #1e1b2e 0%, #2d2a4a 100%);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #4c4f7a;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .industry-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .industry-info {
+            flex: 1;
+        }
+        .industry-name {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .industry-bar {
+            height: 8px;
+            background: #4c4f7a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .industry-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+            border-radius: 4px;
+        }
+        .industry-percent {
+            color: #a5b4fc;
+            font-size: 0.85rem;
+        }
+
+        /* Milestones */
+        .milestones-section {
+            background: linear-gradient(145deg, #1e1b2e 0%, #252244 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid #4c4f7a;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #8b5cf6, #a78bfa, transparent);
+        }
+        .milestone {
+            position: relative;
+            padding: 25px 0 25px 40px;
+            border-bottom: 1px solid #4c4f7a;
+        }
+        .milestone:last-child {
+            border-bottom: none;
+        }
+        .milestone::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 28px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            border: 3px solid #1e1b2e;
+            box-shadow: 0 0 0 3px #8b5cf6;
+        }
+        .milestone-date {
+            font-size: 0.9rem;
+            color: #a78bfa;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .milestone-title {
+            font-size: 1.2rem;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .milestone-desc {
+            color: #a5b4fc;
+            line-height: 1.7;
+        }
+
+        /* Platform Capabilities */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .feature-card {
+            background: linear-gradient(145deg, #1e1b2e 0%, #2d2a4a 100%);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #4c4f7a;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-3px);
+        }
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(167, 139, 250, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        .feature-title {
+            font-size: 1.3rem;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .feature-desc {
+            color: #a5b4fc;
+            line-height: 1.7;
+        }
+        .feature-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #4c4f7a;
+        }
+        .feature-stat {
+            text-align: center;
+        }
+        .feature-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #c4b5fd;
+        }
+        .feature-stat-label {
+            font-size: 0.8rem;
+            color: #a5b4fc;
+            text-transform: uppercase;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .cta-title {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .cta-subtitle {
+            font-size: 1.2rem;
+            color: #f5f3ff;
+            margin-bottom: 30px;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 18px 50px;
+            background: #fff;
+            color: #7c3aed;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Team Stats */
+        .team-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            padding: 30px;
+            background: rgba(30, 27, 46, 0.5);
+            border-radius: 16px;
+            margin-bottom: 40px;
+        }
+        .team-stat {
+            text-align: center;
+        }
+        .team-stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #c4b5fd;
+        }
+        .team-stat-label {
+            color: #a5b4fc;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            border-top: 1px solid #4c4f7a;
+            margin-top: 40px;
+        }
+    </style>
+</head>
 <body>
-<h1>DataFlow</h1>
-<h2>Enterprise Data Analytics Platform</h2>
-<p>"Transforming Raw Data into Strategic Insights"</p>
-<p>Market Performance</p>
-<p>$2.4B Current Valuation</p>
-<p>847% Revenue Growth (2 Years)</p>
-<p>12,500+ Enterprise Customers</p>
-<p>$420M ARR (Annual Recurring Revenue)</p>
-<p>
-Metric 2023 2024 2025 (YTD)
-Revenue $45M $180M $420M
-Valuation $380M $1.2B $2.4B
-Customers 2,100 6,800 12,500+
-Employee Count 180 450 890
-NPS Score 42 58 71
-</p>
-<h3>Milestones: Past 2 Years</h3>
-<p>March 2023: Series B Funding - $85M. Led by Andreessen Horowitz with participation from existing investors. Valuation reached $380M.</p>
-<p>June 2023: AI-Powered Analytics Launch. Introduced predictive analytics engine using proprietary machine learning models, reducing customer churn prediction time by 94%.</p>
-<p>September 2023: Fortune 500 Expansion. Signed 15 Fortune 500 companies including 3 major retailers and 2 healthcare networks.</p>
-<p>January 2024: Series C Funding - $200M. Achieved unicorn status with $1.2B valuation. Funds earmarked for international expansion.</p>
-<p>April 2024: European Market Entry. Opened London and Berlin offices, achieving GDPR compliance certification. 200+ EU customers signed in first quarter.</p>
-<p>August 2024: Platform 3.0 Release. Complete architecture rebuild enabling real-time processing of 10TB+ datasets with sub-second query latency.</p>
-<p>November 2024: Strategic Acquisition. Acquired DataSync Inc. for $65M, adding 50+ data connector integrations and 120 talented engineers.</p>
-<p>February 2025: Enterprise Partnership with AWS. Deepened cloud partnership enabling native AWS marketplace integration and joint go-to-market initiatives.</p>
-<p>March 2025: Series D Funding - $350M. Valuation doubled to $2.4B. Planning IPO for Q4 2026.</p>
-<h3>Ready to Unlock Your Data Potential?</h3>
-<p>Join 12,500+ companies already transforming their analytics</p>
-<a href="#">Request Demo</a>
-<p>© 2025 DataFlow Inc. | San Francisco, CA</p>
+    <div class="container">
+        <header>
+            <h1>DataFlow</h1>
+            <h2>Enterprise Data Analytics Platform</h2>
+            <p class="tagline">"Transforming Raw Data into Strategic Insights"</p>
+        </header>
+
+        <!-- Key Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">💎</div>
+                <div class="stat-label">Current Valuation</div>
+                <div class="stat-value">$2.4B</div>
+                <span class="stat-change positive">↑ 100% from Series C</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">ARR Growth</div>
+                <div class="stat-value">$420M</div>
+                <span class="stat-change trend">↑ 847% (2 Years)</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-label">Enterprise Customers</div>
+                <div class="stat-value">12,500+</div>
+                <span class="stat-change positive">↑ 84% YoY</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-label">Data Processed Daily</div>
+                <div class="stat-value">28PB</div>
+                <span class="stat-change trend">↑ 340% YoY</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-label">Query Response Time</div>
+                <div class="stat-value">0.3s</div>
+                <span class="stat-change positive">↓ 94% faster</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">NPS Score</div>
+                <div class="stat-value">71</div>
+                <span class="stat-change trend">↑ +13 pts YoY</span>
+            </div>
+        </div>
+
+        <!-- Revenue Chart -->
+        <div class="chart-section">
+            <h3 class="section-title">Financial Performance</h3>
+            <div class="growth-chart">
+                <div class="chart-bar-container">
+                    <div class="chart-bar y2023" data-value="$45M"></div>
+                    <span class="chart-label">2023</span>
+                </div>
+                <div class="chart-bar-container">
+                    <div class="chart-bar y2024" data-value="$180M"></div>
+                    <span class="chart-label">2024</span>
+                </div>
+                <div class="chart-bar-container">
+                    <div class="chart-bar y2025" data-value="$420M"></div>
+                    <span class="chart-label">2025 (YTD)</span>
+                </div>
+            </div>
+
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>2023</th>
+                        <th>2024</th>
+                        <th>2025 (YTD)</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Revenue</strong></td>
+                        <td>$45M</td>
+                        <td>$180M</td>
+                        <td>$420M</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,28 20,20 40,10 60,2" fill="none" stroke="#a78bfa" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Valuation</strong></td>
+                        <td>$380M</td>
+                        <td>$1.2B</td>
+                        <td>$2.4B</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,28 20,18 40,8 60,2" fill="none" stroke="#a78bfa" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Customers</strong></td>
+                        <td>2,100</td>
+                        <td>6,800</td>
+                        <td>12,500+</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,28 20,20 40,10 60,3" fill="none" stroke="#a78bfa" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Employee Count</strong></td>
+                        <td>180</td>
+                        <td>450</td>
+                        <td>890</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,28 20,18 40,10 60,3" fill="none" stroke="#a78bfa" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>NPS Score</strong></td>
+                        <td>42</td>
+                        <td>58</td>
+                        <td>71</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,28 20,20 40,12 60,5" fill="none" stroke="#a78bfa" stroke-width="2"/></svg></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Processing Stats -->
+        <div class="chart-section">
+            <h3 class="section-title">Platform Processing Metrics</h3>
+            <div class="processing-grid">
+                <div class="processing-card">
+                    <div class="processing-icon">📊</div>
+                    <div class="processing-label">Queries/Day</div>
+                    <div class="processing-value">4.8B</div>
+                    <div class="processing-sub">+285% YoY</div>
+                </div>
+                <div class="processing-card">
+                    <div class="processing-icon">💾</div>
+                    <div class="processing-label">Data Ingested</div>
+                    <div class="processing-value">28PB</div>
+                    <div class="processing-sub">+340% YoY</div>
+                </div>
+                <div class="processing-card">
+                    <div class="processing-icon">🔄</div>
+                    <div class="processing-label">Data Pipelines</div>
+                    <div class="processing-value">125K</div>
+                    <div class="processing-sub">+420% YoY</div>
+                </div>
+                <div class="processing-card">
+                    <div class="processing-icon">⚡</div>
+                    <div class="processing-label">Avg Query Time</div>
+                    <div class="processing-value">0.3s</div>
+                    <div class="processing-sub">-94% vs 2023</div>
+                </div>
+                <div class="processing-card">
+                    <div class="processing-icon">🎯</div>
+                    <div class="processing-label">Uptime SLA</div>
+                    <div class="processing-value">99.99%</div>
+                    <div class="processing-sub">+0.02% vs 2024</div>
+                </div>
+                <div class="processing-card">
+                    <div class="processing-icon">🌐</div>
+                    <div class="processing-label">Global Regions</div>
+                    <div class="processing-value">14</div>
+                    <div class="processing-sub">+6 new regions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Industry Breakdown -->
+        <div class="chart-section">
+            <h3 class="section-title">Customer Industry Distribution</h3>
+            <div class="industry-grid">
+                <div class="industry-card">
+                    <div class="industry-icon">💰</div>
+                    <div class="industry-info">
+                        <div class="industry-name">Financial Services</div>
+                        <div class="industry-bar"><div class="industry-fill" style="width: 28%"></div></div>
+                        <div class="industry-percent">28% (3,500 customers)</div>
+                    </div>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon">🏥</div>
+                    <div class="industry-info">
+                        <div class="industry-name">Healthcare</div>
+                        <div class="industry-bar"><div class="industry-fill" style="width: 22%"></div></div>
+                        <div class="industry-percent">22% (2,750 customers)</div>
+                    </div>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon">🛒</div>
+                    <div class="industry-info">
+                        <div class="industry-name">Retail & E-commerce</div>
+                        <div class="industry-bar"><div class="industry-fill" style="width: 18%"></div></div>
+                        <div class="industry-percent">18% (2,250 customers)</div>
+                    </div>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon">🏭</div>
+                    <div class="industry-info">
+                        <div class="industry-name">Manufacturing</div>
+                        <div class="industry-bar"><div class="industry-fill" style="width: 14%"></div></div>
+                        <div class="industry-percent">14% (1,750 customers)</div>
+                    </div>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon">🎓</div>
+                    <div class="industry-info">
+                        <div class="industry-name">Education</div>
+                        <div class="industry-bar"><div class="industry-fill" style="width: 10%"></div></div>
+                        <div class="industry-percent">10% (1,250 customers)</div>
+                    </div>
+                </div>
+                <div class="industry-card">
+                    <div class="industry-icon">🔬</div>
+                    <div class="industry-info">
+                        <div class="industry-name">Technology</div>
+                        <div class="industry-bar"><div class="industry-fill" style="width: 8%"></div></div>
+                        <div class="industry-percent">8% (1,000 customers)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platform Capabilities -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">AI-Powered Analytics</div>
+                <div class="feature-desc">Predictive analytics engine using proprietary ML models, reducing customer churn prediction time by 94%.</div>
+                <div class="feature-stats">
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">85</div>
+                        <div class="feature-stat-label">ML Models</div>
+                    </div>
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">94%</div>
+                        <div class="feature-stat-label">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">Real-Time Processing</div>
+                <div class="feature-desc">Complete architecture rebuild enabling real-time processing of 10TB+ datasets with sub-second query latency.</div>
+                <div class="feature-stats">
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">10TB+</div>
+                        <div class="feature-stat-label">Dataset Size</div>
+                    </div>
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">0.3s</div>
+                        <div class="feature-stat-label">Latency</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <div class="feature-title">Data Connectors</div>
+                <div class="feature-desc">Seamless integration with 200+ data sources including DataSync acquisition adding 50+ connectors.</div>
+                <div class="feature-stats">
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">200+</div>
+                        <div class="feature-stat-label">Connectors</div>
+                    </div>
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">99.9%</div>
+                        <div class="feature-stat-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">Enterprise Security</div>
+                <div class="feature-desc">SOC 2 Type II, GDPR compliant with end-to-end encryption and role-based access control.</div>
+                <div class="feature-stats">
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">SOC 2</div>
+                        <div class="feature-stat-label">Type II</div>
+                    </div>
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">GDPR</div>
+                        <div class="feature-stat-label">Compliant</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <div class="feature-title">Collaborative Workspaces</div>
+                <div class="feature-desc">Real-time collaboration with shared dashboards, commenting, and automated report distribution.</div>
+                <div class="feature-stats">
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">48K</div>
+                        <div class="feature-stat-label">Workspaces</div>
+                    </div>
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">120</div>
+                        <div class="feature-stat-label">Collaborators</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">☁️</div>
+                <div class="feature-title">AWS Native Integration</div>
+                <div class="feature-desc">Deep AWS partnership enabling native marketplace integration and joint go-to-market initiatives.</div>
+                <div class="feature-stats">
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">45%</div>
+                        <div class="feature-stat-label">AWS Customers</div>
+                    </div>
+                    <div class="feature-stat">
+                        <div class="feature-stat-value">$50M</div>
+                        <div class="feature-stat-label">Joint Pipeline</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Stats -->
+        <div class="team-stats">
+            <div class="team-stat">
+                <div class="team-stat-value">890</div>
+                <div class="team-stat-label">Total Employees</div>
+            </div>
+            <div class="team-stat">
+                <div class="team-stat-value">320</div>
+                <div class="team-stat-label">Engineers</div>
+            </div>
+            <div class="team-stat">
+                <div class="team-stat-value">180</div>
+                <div class="team-stat-label">Data Scientists</div>
+            </div>
+            <div class="team-stat">
+                <div class="team-stat-value">65</div>
+                <div class="team-stat-label">PhDs</div>
+            </div>
+        </div>
+
+        <!-- Milestones -->
+        <div class="milestones-section">
+            <h3 class="section-title">Milestones: Past 2 Years</h3>
+            <div class="timeline">
+                <div class="milestone">
+                    <div class="milestone-date">March 2023</div>
+                    <div class="milestone-title">Series B Funding - $85M</div>
+                    <div class="milestone-desc">Led by Andreessen Horowitz with participation from existing investors. Valuation reached $380M. Funds allocated to AI R&D.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">June 2023</div>
+                    <div class="milestone-title">AI-Powered Analytics Launch</div>
+                    <div class="milestone-desc">Introduced predictive analytics engine using proprietary machine learning models, reducing customer churn prediction time by 94%.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">September 2023</div>
+                    <div class="milestone-title">Fortune 500 Expansion</div>
+                    <div class="milestone-desc">Signed 15 Fortune 500 companies including 3 major retailers and 2 healthcare networks, adding $12M in ARR.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">January 2024</div>
+                    <div class="milestone-title">Series C Funding - $200M</div>
+                    <div class="milestone-desc">Achieved unicorn status with $1.2B valuation. Funds earmarked for international expansion and platform engineering.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">April 2024</div>
+                    <div class="milestone-title">European Market Entry</div>
+                    <div class="milestone-desc">Opened London and Berlin offices, achieving GDPR compliance certification. 200+ EU customers signed in first quarter.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">August 2024</div>
+                    <div class="milestone-title">Platform 3.0 Release</div>
+                    <div class="milestone-desc">Complete architecture rebuild enabling real-time processing of 10TB+ datasets with sub-second query latency.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">November 2024</div>
+                    <div class="milestone-title">Strategic Acquisition - DataSync</div>
+                    <div class="milestone-desc">Acquired DataSync Inc. for $65M, adding 50+ data connector integrations and 120 talented engineers.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">February 2025</div>
+                    <div class="milestone-title">Enterprise Partnership with AWS</div>
+                    <div class="milestone-desc">Deepened cloud partnership enabling native AWS marketplace integration and joint go-to-market initiatives.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">March 2025</div>
+                    <div class="milestone-title">Series D Funding - $350M</div>
+                    <div class="milestone-desc">Valuation doubled to $2.4B. Planning IPO for Q4 2026. Led by T. Rowe Price with participation from Fidelity.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3 class="cta-title">Ready to Unlock Your Data Potential?</h3>
+            <p class="cta-subtitle">Join 12,500+ companies already transforming their analytics</p>
+            <a href="#" class="cta-button">Request Demo</a>
+        </div>
+
+        <footer>
+            <p>© 2025 DataFlow Inc. | San Francisco, CA</p>
+        </footer>
+    </div>
 </body>
 </html>

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureShield - Enterprise Cybersecurity Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0f0d 0%, #1a1f1c 50%, #0a0f0d 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(60px); }
+        }
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, #d1fae5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        h2 {
+            font-size: 1.5rem;
+            color: #d1fae5;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+        .tagline {
+            font-size: 1.3rem;
+            color: #ecfdf5;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        .stat-card {
+            background: linear-gradient(145deg, #1a1f1c 0%, #2d3530 100%);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #374640;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #059669, #10b981, #34d399);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        .stat-label {
+            color: #a7f3d0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .stat-change.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+        .stat-change.trend {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: linear-gradient(145deg, #1a1f1c 0%, #252b27 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid #374640;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(180deg, #10b981, #34d399);
+            border-radius: 3px;
+        }
+
+        /* Threat Timeline */
+        .threat-timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 200px;
+            padding: 20px 0;
+            border-bottom: 2px solid #374640;
+            position: relative;
+        }
+        .threat-point {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .threat-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            animation: pulse-red 2s ease-in-out infinite;
+        }
+        .threat-circle.blocked {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        }
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
+        }
+        .threat-label {
+            color: #a7f3d0;
+            font-size: 0.9rem;
+        }
+
+        /* Metrics Table */
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        .metrics-table th,
+        .metrics-table td {
+            padding: 18px 20px;
+            text-align: left;
+            border-bottom: 1px solid #374640;
+        }
+        .metrics-table th {
+            color: #a7f3d0;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .metrics-table td {
+            color: #e2e8f0;
+            font-size: 1.1rem;
+        }
+        .metrics-table tr:hover td {
+            background: rgba(16, 185, 129, 0.05);
+        }
+        .trend-line {
+            width: 60px;
+            height: 30px;
+        }
+
+        /* Security Stats Grid */
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .security-card {
+            background: linear-gradient(145deg, #2d3530 0%, #3d4540 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid #374640;
+            transition: all 0.3s;
+        }
+        .security-card:hover {
+            transform: translateY(-3px);
+            border-color: #10b981;
+        }
+        .security-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        .security-label {
+            color: #a7f3d0;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .security-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .security-sub {
+            color: #4ade80;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* Product Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .feature-card {
+            background: linear-gradient(145deg, #1a1f1c 0%, #2d3530 100%);
+            border-radius: 16px;
+            padding: 35px;
+            border: 1px solid #374640;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card:hover {
+            border-color: #10b981;
+            transform: translateY(-3px);
+        }
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+        }
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.2));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .feature-title {
+            font-size: 1.4rem;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .feature-desc {
+            color: #a7f3d0;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+        .feature-specs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding-top: 25px;
+            border-top: 1px solid #374640;
+        }
+        .feature-spec {
+            text-align: center;
+        }
+        .feature-spec-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #6ee7b7;
+        }
+        .feature-spec-label {
+            font-size: 0.75rem;
+            color: #a7f3d0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Threat Map Visualization */
+        .threat-map {
+            background: linear-gradient(145deg, #1a1f1c 0%, #252b27 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid #374640;
+            position: relative;
+            overflow: hidden;
+        }
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .map-cell {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .map-cell.safe { background: rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+        .map-cell.warning { background: rgba(245, 158, 11, 0.3); color: #fbbf24; }
+        .map-cell.critical { background: rgba(239, 68, 68, 0.3); color: #f87171; }
+
+        /* Milestones */
+        .milestones-section {
+            background: linear-gradient(145deg, #1a1f1c 0%, #252b27 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid #374640;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #10b981, #34d399, transparent);
+        }
+        .milestone {
+            position: relative;
+            padding: 25px 0 25px 40px;
+            border-bottom: 1px solid #374640;
+        }
+        .milestone:last-child {
+            border-bottom: none;
+        }
+        .milestone::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 28px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #10b981;
+            border: 3px solid #1a1f1c;
+            box-shadow: 0 0 0 3px #10b981;
+        }
+        .milestone-date {
+            font-size: 0.9rem;
+            color: #34d399;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .milestone-title {
+            font-size: 1.2rem;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .milestone-desc {
+            color: #a7f3d0;
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .cta-title {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .cta-subtitle {
+            font-size: 1.2rem;
+            color: #d1fae5;
+            margin-bottom: 30px;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 18px 50px;
+            background: #fff;
+            color: #059669;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Certifications */
+        .cert-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            padding: 30px;
+            background: rgba(26, 31, 28, 0.5);
+            border-radius: 16px;
+            margin-bottom: 40px;
+        }
+        .cert-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .cert-icon {
+            font-size: 1.5rem;
+        }
+        .cert-name {
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            border-top: 1px solid #374640;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SecureShield</h1>
+            <h2>Enterprise Cybersecurity Platform</h2>
+            <p class="tagline">"Protecting What Matters Most"</p>
+        </header>
+
+        <!-- Key Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">💎</div>
+                <div class="stat-label">Current Valuation</div>
+                <div class="stat-value">$1.2B</div>
+                <span class="stat-change positive">↑ 71% from Series C</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-label">ARR Growth</div>
+                <div class="stat-value">$195M</div>
+                <span class="stat-change trend">↑ 268% (2 Years)</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-label">Enterprise Customers</div>
+                <div class="stat-value">5,500+</div>
+                <span class="stat-change positive">↑ 83% YoY</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🛡️</div>
+                <div class="stat-label">Threats Blocked (24h)</div>
+                <div class="stat-value">847M</div>
+                <span class="stat-change trend">↑ 145% YoY</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-label">Mean Time to Detect</div>
+                <div class="stat-value">12s</div>
+                <span class="stat-change positive">↓ 89% faster</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">Detection Accuracy</div>
+                <div class="stat-value">99.97%</div>
+                <span class="stat-change trend">↑ 0.08% vs 2024</span>
+            </div>
+        </div>
+
+        <!-- Threat Protection Overview -->
+        <div class="threat-map">
+            <h3 class="section-title">Global Threat Detection Grid</h3>
+            <div class="threat-timeline">
+                <div class="threat-point">
+                    <div class="threat-circle">847M</div>
+                    <div class="threat-label">Attacks Blocked Today</div>
+                </div>
+                <div class="threat-point">
+                    <div class="threat-circle blocked">98.3%</div>
+                    <div class="threat-label">Auto-Remediation Rate</div>
+                </div>
+                <div class="threat-point">
+                    <div class="threat-circle">0</div>
+                    <div class="threat-label">Active Breaches</div>
+                </div>
+            </div>
+            <div class="map-grid">
+                <div class="map-cell safe">US-W</div>
+                <div class="map-cell safe">US-E</div>
+                <div class="map-cell warning">EU-W</div>
+                <div class="map-cell safe">EU-E</div>
+                <div class="map-cell safe">AP-SE</div>
+                <div class="map-cell safe">AP-JP</div>
+                <div class="map-cell safe">SA</div>
+                <div class="map-cell warning">AF</div>
+                <div class="map-cell safe">OC</div>
+                <div class="map-cell safe">UK</div>
+                <div class="map-cell safe">CA</div>
+                <div class="map-cell safe">MX</div>
+            </div>
+        </div>
+
+        <!-- Security Metrics -->
+        <div class="chart-section">
+            <h3 class="section-title">Security Operations Metrics</h3>
+            <div class="security-grid">
+                <div class="security-card">
+                    <div class="security-icon">🦠</div>
+                    <div class="security-label">Malware Blocked</div>
+                    <div class="security-value">2.4B</div>
+                    <div class="security-sub">+156% YoY</div>
+                </div>
+                <div class="security-card">
+                    <div class="security-icon">🎣</div>
+                    <div class="security-label">Phishing Prevented</div>
+                    <div class="security-value">892M</div>
+                    <div class="security-sub">+234% YoY</div>
+                </div>
+                <div class="security-card">
+                    <div class="security-icon">🔓</div>
+                    <div class="security-label">Intrusions Stopped</div>
+                    <div class="security-value">156K</div>
+                    <div class="security-sub">+89% YoY</div>
+                </div>
+                <div class="security-card">
+                    <div class="security-icon">🤖</div>
+                    <div class="security-label">Bot Attacks</div>
+                    <div class="security-value">5.2B</div>
+                    <div class="security-sub">+312% YoY</div>
+                </div>
+                <div class="security-card">
+                    <div class="security-icon">💾</div>
+                    <div class="security-label">Ransomware Blocked</div>
+                    <div class="security-value">78K</div>
+                    <div class="security-sub">+445% YoY</div>
+                </div>
+                <div class="security-card">
+                    <div class="security-icon">🌐</div>
+                    <div class="security-label">DDoS Mitigated</div>
+                    <div class="security-value">12.4K</div>
+                    <div class="security-sub">+67% YoY</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Performance -->
+        <div class="chart-section">
+            <h3 class="section-title">Financial Performance</h3>
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>2023</th>
+                        <th>2024</th>
+                        <th>2025 (YTD)</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Revenue</strong></td>
+                        <td>$53M</td>
+                        <td>$112M</td>
+                        <td>$195M</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,25 20,18 40,10 60,2" fill="none" stroke="#34d399" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Valuation</strong></td>
+                        <td>$280M</td>
+                        <td>$700M</td>
+                        <td>$1.2B</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,25 20,17 40,8 60,2" fill="none" stroke="#34d399" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Customers</strong></td>
+                        <td>1,850</td>
+                        <td>3,400</td>
+                        <td>5,500+</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,25 20,18 40,10 60,3" fill="none" stroke="#34d399" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Protected Endpoints</strong></td>
+                        <td>2.8M</td>
+                        <td>8.5M</td>
+                        <td>24M+</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,28 20,20 40,8 60,2" fill="none" stroke="#34d399" stroke-width="2"/></svg></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Employee Count</strong></td>
+                        <td>145</td>
+                        <td>340</td>
+                        <td>580</td>
+                        <td><svg class="trend-line" viewBox="0 0 60 30"><polyline points="0,25 20,18 40,10 60,5" fill="none" stroke="#34d399" stroke-width="2"/></svg></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Product Capabilities -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">Endpoint Protection Platform</div>
+                <div class="feature-desc">AI-powered endpoint detection and response (EDR) with real-time behavioral analysis and automated threat containment.</div>
+                <div class="feature-specs">
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">24M+</div>
+                        <div class="feature-spec-label">Protected</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">12s</div>
+                        <div class="feature-spec-label">Detection</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">99.97%</div>
+                        <div class="feature-spec-label">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">SIEM & Security Analytics</div>
+                <div class="feature-desc">Cloud-native SIEM with petabyte-scale data ingestion, real-time correlation, and ML-powered anomaly detection.</div>
+                <div class="feature-specs">
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">5.2PB</div>
+                        <div class="feature-spec-label">Daily Ingest</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">50ms</div>
+                        <div class="feature-spec-label">Query Time</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">99.99%</div>
+                        <div class="feature-spec-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <div class="feature-title">Threat Intelligence</div>
+                <div class="feature-desc">Global threat intelligence platform with 50+ threat feeds, dark web monitoring, and predictive threat modeling.</div>
+                <div class="feature-specs">
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">2.8M</div>
+                        <div class="feature-spec-label">IOCs/Day</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">98.5%</div>
+                        <div class="feature-spec-label">Prediction</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">156</div>
+                        <div class="feature-spec-label">Sources</div>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">☁️</div>
+                <div class="feature-title">Cloud Security Posture</div>
+                <div class="feature-desc">Multi-cloud security with continuous compliance monitoring, misconfiguration detection, and workload protection.</div>
+                <div class="feature-specs">
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">12</div>
+                        <div class="feature-spec-label">Clouds</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">8.5M</div>
+                        <div class="feature-spec-label">Assets</div>
+                    </div>
+                    <div class="feature-spec">
+                        <div class="feature-spec-value">850+</div>
+                        <div class="feature-spec-label">Controls</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certifications -->
+        <div class="cert-grid">
+            <div class="cert-item">
+                <span class="cert-icon">🔒</span>
+                <span class="cert-name">SOC 2 Type II</span>
+            </div>
+            <div class="cert-item">
+                <span class="cert-icon">🏛️</span>
+                <span class="cert-name">FedRAMP High</span>
+            </div>
+            <div class="cert-item">
+                <span class="cert-icon">🇪🇺</span>
+                <span class="cert-name">GDPR Compliant</span>
+            </div>
+            <div class="cert-item">
+                <span class="cert-icon">🏥</span>
+                <span class="cert-name">HIPAA Certified</span>
+            </div>
+            <div class="cert-item">
+                <span class="cert-icon">💳</span>
+                <span class="cert-name">PCI DSS Level 1</span>
+            </div>
+            <div class="cert-item">
+                <span class="cert-icon">🛡️</span>
+                <span class="cert-name">ISO 27001</span>
+            </div>
+        </div>
+
+        <!-- Milestones -->
+        <div class="milestones-section">
+            <h3 class="section-title">Milestones: Past 2 Years</h3>
+            <div class="timeline">
+                <div class="milestone">
+                    <div class="milestone-date">February 2023</div>
+                    <div class="milestone-title">Series A Funding - $45M</div>
+                    <div class="milestone-desc">Led by Bessemer Venture Partners at $280M valuation. Focus on AI-driven threat detection R&D and initial market expansion.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">June 2023</div>
+                    <div class="milestone-title">ThreatIntel Platform Launch</div>
+                    <div class="milestone-desc">Launched proprietary threat intelligence platform aggregating 50+ global threat feeds with 98.5% prediction accuracy.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">September 2023</div>
+                    <div class="milestone-title">SOC 2 Type II Certification</div>
+                    <div class="milestone-desc">Achieved enterprise security compliance, unlocking deals with Fortune 500 healthcare and financial services firms.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">January 2024</div>
+                    <div class="milestone-title">Series B Funding - $95M</div>
+                    <div class="milestone-desc">Led by Insight Partners at $700M valuation. Funds allocated to cloud security product development and international expansion.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">May 2024</div>
+                    <div class="milestone-title">Cloud Security Suite Launch</div>
+                    <div class="milestone-desc">Released multi-cloud security posture management supporting AWS, Azure, GCP with 850+ compliance controls.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">August 2024</div>
+                    <div class="milestone-title">FedRAMP High Authorization</div>
+                    <div class="milestone-desc">Achieved FedRAMP High authorization, enabling contracts with U.S. government agencies worth $45M annually.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">November 2024</div>
+                    <div class="milestone-title">Acquisition - CyberWatch Labs</div>
+                    <div class="milestone-desc">Acquired CyberWatch Labs for $38M, adding advanced deception technology and 45 security researchers to team.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">February 2025</div>
+                    <div class="milestone-title">Unicorn Achievement</div>
+                    <div class="milestone-desc">Series C funding of $180M at $1.2B valuation. Achieved unicorn status, named to Cybersecurity 500 list.</div>
+                </div>
+                <div class="milestone">
+                    <div class="milestone-date">March 2025</div>
+                    <div class="milestone-title">Enterprise Partnership - CrowdStrike</div>
+                    <div class="milestone-desc">Strategic partnership with CrowdStrike for joint threat intelligence sharing and integrated endpoint protection solutions.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <h3 class="cta-title">Protect Your Enterprise Today</h3>
+            <p class="cta-subtitle">Join 5,500+ organizations trusting SecureShield with their cybersecurity</p>
+            <a href="#" class="cta-button">Get Security Assessment</a>
+        </div>
+
+        <footer>
+            <p>© 2025 SecureShield Security Inc. | Boston, MA</p>
+        </footer>
+    </div>
+</body>
+</html>
