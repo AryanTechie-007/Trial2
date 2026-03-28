@@ -107,15 +107,17 @@ def scrape_competitor(url: str):
     discovered_links = data.get("links", [])
     valuable_paths = []
     
-    # 3. Dynamically filter for structural pages (Pricing, Features, Product)
+    # 3. Gather all internal links to explore the entire website
     for link in discovered_links:
-        if re.search(r'(pricing|price|features|product|solution|about)', link, re.IGNORECASE):
-            full_url = urljoin(url, link)
-            if urlparse(full_url).netloc == parsed.netloc:
+        full_url = urljoin(url, link)
+        # Ensure it's an internal link on the same domain
+        if urlparse(full_url).netloc == parsed.netloc:
+            # Skip media files, mailto, tel, etc.
+            if not any(full_url.lower().endswith(ext) for ext in ['.pdf', '.png', '.jpg', '.jpeg', '.mp4', '.svg', '.zip']) and not full_url.startswith('mailto:') and not full_url.startswith('tel:'):
                 valuable_paths.append(full_url)
     
-    # 4. Deduplicate and limit to top 4 deepest structural links to prevent token overloads
-    valuable_paths = list(set(valuable_paths))[:4]
+    # 4. Deduplicate and limit to top 25 internal links to prevent infinite scraping/time-outs
+    valuable_paths = list(set(valuable_paths))[:25]
     
     # 5. Deep Spidering: Navigate to discovered structural pages
     for spider_url in valuable_paths:
@@ -134,6 +136,7 @@ def scrape_competitor(url: str):
     return {
         "headings": list(set(collected_headings)),
         "cta_buttons": list(set(collected_cta)),
-        "text_payload": merged_text[:30000],
+        # Return the entire merged text without truncating it
+        "text_payload": merged_text,
         "content_hash": content_hash,
     }

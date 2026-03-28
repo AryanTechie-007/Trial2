@@ -4,11 +4,19 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
 
+# Load env
+from dotenv import load_dotenv
+load_dotenv()
+
 # The provided Gemini API Key
-GEMINI_API_KEY = "AIzaSyAwFeSqOg6JHyvbo-leH1gn6_ox10XMZ6o"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 # Initialize genai client
-client = genai.Client(api_key=GEMINI_API_KEY)
+if GEMINI_API_KEY:
+    client = genai.Client(api_key=GEMINI_API_KEY)
+else:
+    client = None
+
 
 class Battlecard(BaseModel):
     their_claim: str = Field(description="The main claim the competitor is making on their page.")
@@ -52,15 +60,7 @@ def analyze_competitor_content(scraped_data: dict, target_scope: str = "all") ->
         return json.loads(response.text)
     except Exception as e:
         print(f"API Error in analyze_competitor_content: {e}")
-        return {
-            "intent_signals": ["Expanding feature set", "Targeting enterprise clients", "Pivoting to infrastructure"],
-            "quantitative_facts": ["Pricing: $29/mo", "99.99% Uptime SLA", "24/7 Support"],
-            "battlecard": {
-                "their_claim": "We are the leading scalable platform.",
-                "our_counter": "Our specialized architecture offers better performance metrics and zero downtime.",
-                "sales_rebuttal": "Ask them about their exact P99 latency and see if they can guarantee it in writing."
-            }
-        }
+        raise ValueError(f"Gemini API Error: {str(e)}")
 
 
 def process_competitor_content(scraped_data: dict, target_scope: str = "all") -> dict:
@@ -87,13 +87,7 @@ def discover_competitors(company_name: str) -> dict:
         return json.loads(response.text)
     except Exception as e:
         print(f"API Error in discover_competitors: {e}")
-        return {
-            "competitors": [
-                {"name": "AlphaTech", "url": "https://alphatech.example.com"},
-                {"name": "BetaSolutions", "url": "https://betasolutions.example.com"},
-                {"name": "GammaSystems", "url": "https://gammasystems.example.com"}
-            ]
-        }
+        raise ValueError(f"Gemini API Error: {str(e)}")
 
 class CompetitorScore(BaseModel):
     name: str = Field(description="Competitor name")
@@ -130,19 +124,7 @@ def compare_competitors(competitor_data_list: list[dict]) -> dict:
         return json.loads(response.text)
     except Exception as e:
         print(f"API Error in compare_competitors: {e}")
-        comps = []
-        for c in competitor_data_list:
-            comps.append({
-                "name": c["name"],
-                "cost_leadership": 75,
-                "feature_depth": 80,
-                "enterprise_readiness": 65,
-                "developer_experience": 85
-            })
-        return {
-            "scoring": comps,
-            "strategic_summary": "There is notable market whitespace in enterprise readiness and premium security compliance that you can easily exploit."
-        }
+        raise ValueError(f"Gemini API Error: {str(e)}")
 
 class StrikePlanAction(BaseModel):
     title: str = Field(description="Actionable title for the initiative")
@@ -174,36 +156,32 @@ def generate_strike_plan(own_company: str, own_payload: dict, competitor: str, c
         return json.loads(response.text)
     except Exception as e:
         print(f"API Error in generate_strike_plan: {e}")
-        return {
-            "executive_summary": f"{competitor} lacks robust API integration tools compared to our platform, leaving their enterprise clients frustrated.",
-            "offensive_strategies": [
-                {
-                    "title": "Target their API rate limits", 
-                    "tactical_steps": ["Audit their public docs", "Create a 1-to-1 comparison sheet", "Launch targeted ads at developers"], 
-                    "expected_impact": "Win over developer-centric accounts"
-                },
-                {
-                    "title": "Highlight our uptime architecture", 
-                    "tactical_steps": ["Publish our uptime logs", "Compare SLA guarantees", "Run an outbound email campaign"], 
-                    "expected_impact": "Poach their top enterprise customers"
-                },
-                {
-                    "title": "Compare Total Cost of Ownership", 
-                    "tactical_steps": ["Build an interactive cost calculator", "Publish a definitive whitepaper", "Host a migration webinar"], 
-                    "expected_impact": "Shatter their cost leadership perception"
-                }
-            ],
-            "defensive_strategies": [
-                {
-                    "title": "Lock in high-risk clients", 
-                    "tactical_steps": ["Offer proactive renewals at a discount", "Provide white-glove consulting", "Host exclusive advisory boards"], 
-                    "expected_impact": "Prevent critical churn"
-                },
-                {
-                    "title": "Aggressive feature parity", 
-                    "tactical_steps": ["Fast-track missing integrations", "Publish a transparent public roadmap", "Communicate shipping velocity"], 
-                    "expected_impact": "Eliminate their primary sales objections"
-                }
-            ]
-        }
+class CompanyVerificationResult(BaseModel):
+    is_match: bool = Field(description="True if the actual website content strongly aligns with the user's provided description, False if it is a lie or a complete mismatch.")
+    reason: str = Field(description="A short 1-sentence explanation of why it matched or mismatched.")
 
+def verify_company_description(scraped_data: dict, user_description: str) -> dict:
+    prompt = (
+        f"A user is pretending or claiming that their company does the following:\n"
+        f"'{user_description}'\n\n"
+        f"We have crawled their actual website. Here is their actual website content:\n"
+        f"Headings: {scraped_data.get('headings', [])}\n"
+        f"Content: {scraped_data.get('text_payload', '')[:20000]}\n\n"
+        "Evaluate if their description is truthful and matches the actual nature of their business. "
+        "Return is_match=true if it generally matches, and false if they are lying (e.g., claiming to be a cloud company when they sell cars)."
+    )
+    
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=CompanyVerificationResult,
+                temperature=0.1,
+            ),
+        )
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"API Error in verify_company_description: {e}")
+        raise ValueError(f"Gemini API Error: {str(e)}")

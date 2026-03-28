@@ -2,13 +2,13 @@ import json
 from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from .database import engine, Base, get_db, Scrape, User
+from database import engine, Base, get_db, Scrape, User
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from .auth import get_password_hash, verify_password, create_access_token, SECRET_KEY, ALGORITHM
+from auth import get_password_hash, verify_password, create_access_token, SECRET_KEY, ALGORITHM
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 
@@ -56,6 +56,8 @@ class UserCreate(BaseModel):
     email: str
     password: str
     company_name: str
+    website_url: str | None = None
+    description: str | None = None
 
 class UserLogin(BaseModel):
     email: str
@@ -67,13 +69,36 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # 1. Verification Phase: If providing a website and description, we verify identity
+    if user.website_url and user.description:
+        from scraper import scrape_competitor
+        from ai_engine import verify_company_description
+        try:
+            # Crawl the website
+            scraped_data = scrape_competitor(user.website_url)
+            # Verify with Gemini
+            verification = verify_company_description(scraped_data, user.description)
+            if not verification.get("is_match", True):
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Verification Failed: {verification.get('reason', 'Your description does not match your website content.')}"
+                )
+        except HTTPException:
+            raise
+        except Exception as e:
+            # If the scraper fails entirely or API fails, we could block them or let them in.
+            # For strict onboarding, let's block or return error:
+            raise HTTPException(status_code=400, detail=f"Failed to verify website identity: {str(e)}")
+
     hashed_pw = get_password_hash(user.password)
     new_user = User(
         email=user.email,
         hashed_password=hashed_pw,
         name=user.name,
         company_name=user.company_name,
-        plan_tier="starter" # default plan
+        website_url=user.website_url,
+        description=user.description,
+        plan_tier="enterprise" # default plan
     )
     db.add(new_user)
     db.commit()
@@ -113,8 +138,8 @@ def trigger_scrape(request: ScrapeRequest, db: Session = Depends(get_db), curren
     if user_scrapes >= limit:
         raise HTTPException(status_code=403, detail=f"Scrape limit reached for your plan ({current_user.plan_tier}). Upgrade to add more competitors.")
 
-    from .scraper import scrape_competitor
-    from .ai_engine import process_competitor_content
+    from scraper import scrape_competitor
+    from ai_engine import process_competitor_content
     try:
         content = scrape_competitor(request.url)
         analysis_dict = process_competitor_content(content, request.target_scope or "all")
@@ -153,7 +178,7 @@ class CompareRequest(BaseModel):
 
 @app.post("/api/competitors/compare")
 def compare(request: CompareRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    from .ai_engine import compare_competitors
+    from ai_engine import compare_competitors
     try:
         data_list = []
         for name in request.competitors:
@@ -174,7 +199,7 @@ def discover(request: DiscoverRequest, current_user: User = Depends(get_current_
     if current_user.plan_tier not in ["growth", "enterprise"]:
         raise HTTPException(status_code=403, detail="OSINT Auto-Discovery is locked for your plan. Please upgrade to Growth or Enterprise to unlock instant discovery mapping.")
 
-    from .ai_engine import discover_competitors
+    from ai_engine import discover_competitors
     try:
         result = discover_competitors(request.company_name)
         return {"data": result}
@@ -188,7 +213,7 @@ class ProfileUpdate(BaseModel):
 
 @app.post("/api/user/profile")
 def update_profile(profile: ProfileUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    from .auth import get_password_hash
+    from auth import get_password_hash
     current_user.company_name = profile.company_name
     current_user.plan_tier = profile.plan_tier
     if profile.password:
@@ -214,7 +239,7 @@ def get_strategy(name: str, db: Session = Depends(get_db), current_user: User = 
         
     own_scrape = db.query(Scrape).filter(Scrape.user_id == current_user.id, Scrape.competitor_name == current_user.company_name.lower()).order_by(Scrape.timestamp.desc()).first()
 
-    from .ai_engine import generate_strike_plan
+    from ai_engine import generate_strike_plan
     try:
         strike_plan = generate_strike_plan(current_user.company_name, own_scrape.payload if own_scrape else None, name, scrape.payload)
         return {"data": strike_plan}

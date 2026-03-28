@@ -21,6 +21,8 @@ class User(Base):
     name = Column(String)
     plan_tier = Column(String, default="starter") # starter, growth, enterprise
     company_name = Column(String, nullable=True) # for baseline comparison
+    website_url = Column(String, nullable=True) # captured during signup
+    description = Column(String, nullable=True) # captured during signup
 
 class Scrape(Base):
     __tablename__ = "scrapes"
